@@ -1,0 +1,107 @@
+Docker image = Bare minimum OS + App run time + system packages and dependencies and app code
+
+Bare minimum OS ----> only required packages are available
+
+AMI is a static file
+Ec2 instance , if u run AMI ,it can create instance ---> Running version of AMI is called instance
+containerization can install in VM's ex: Docker
+Docker image: static file
+Docker container: running instance of an image is called container
+install docker : it will create a group called docker
+users who are in docker group or root user can only run docker commands
+usermod -aG docker ec2-user: here docker is a group , to add ec2-user in this docker group.
+
+docker images : list down all the images
+docker ps: it will show running containers
+docker pull nginx:alpine: pull from the docker hub first time
+docker create <imageid>:tag, create a container
+docker create nginx, it will create a container by using latest tag
+docker ps -a , all containers with status
+docker start <containerID> , start container
+docker status <containerID>
+docker ps , all running containers
+
+for all the above steps will do in single line
+
+docker run = docker pull + docker create + docker run
+docker stop <containerID>: container running state to exited state
+docker ps -a
+docker rm <containerID> or docker rm -f <containerID>
+to remove single image or container id
+docker rm <containerID>
+docker rmi <imageID> , rmi is a remove image
+to remove all images or container ID
+docker rm `docker ps -a -q`
+docker rmi `docker images -a -q`
+docker run -d nginx , it will pull + create container + run
+
+How can you access docker container from internet?
+by enabling the port, we need to open the host port that can redirect traffic to container
+docker run -d -p <host-port>:<container port> nginx
+ex: docker run -d -p 8000:80 nginx
+docker logs "<container ID>"
+docker logs -f "<container ID>" , here -f means running
+docker inspect imageID or docker inspect containerID
+How to get the terminal access of running container?
+docker exec -it "containerID" bash,command allows you to open an interactive terminal session inside a running Docker container
+
+Dockerfile ----> it is the declarative of creating custom image.
+shell ----> keep all the commands in a file and run it.
+Dockerfile -----> keep all the instructions in a file i.e.Dockerfile and build the image.
+
+How to build an image?
+docker build -t url/username/image-name:tag . ====> will check for Dockerfile
+Dockerfile Instructions:
+========================
+from: from should be the first instructions to represent base os
+FROM image-name:tag
+2.run:
+======
+we will use RUN instructions to install packages and configure them. RUN instruction execute at the time of creation.
+RUN  yum install nginx -y
+3.CMD:
+======
+this instruction will run at the time of container creation.
+systemctl start backend ----> then only we can access backend application
+whatever the instruction you give in  image to run as container , should run
+systemctl will not work in containers and images.
+docker run -it ------> create container and login inside......
+docker run -d -p 8080:80 cmd:1.0, redirect traffic to the container
+
+RUN vs CMD:
+=============
+RUN -----> executes at build time i.e image creation time
+CMD -----> only executes at the time of container creation i.e docker run
+
+ex:
+===
+FROM   almalinux:9
+RUN    dnf install nginx -y
+CMD    ["nginx","-g","daemon-off"]
+
+LABEL:
+======
+1000 white covers , label the covers
+to filter which label
+docker images --help
+docker images -f(filter) label=course=Devops
+ex:
+===
+docker
+
+EXPOSE:
+=======
+this instruction will let the users know what are the ports used by the image.
+ex:
+===
+FROM            almalinux:9
+EXPOSE          80
+
+inspect the we know the port no
+docker inspect container id
+
+How can you push the image to the docker hub?
+url/username/image-name:tag
+you can push images to the docker hub ,nexus,ECR, JFROG, etc...
+docker push joindevops/lable:1.0 , here reposiroty name is not correct, so
+docker tag label:1.0 joindevops/label:v1.1.0
