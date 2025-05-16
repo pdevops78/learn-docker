@@ -105,3 +105,175 @@ url/username/image-name:tag
 you can push images to the docker hub ,nexus,ECR, JFROG, etc...
 docker push joindevops/lable:1.0 , here reposiroty name is not correct, so
 docker tag label:1.0 joindevops/label:v1.1.0
+
+ENV
+
+COPY: this cmd is used to copy the files from source to destination
+ex:
+===
+FROM                       almalinux:9
+RUN                        dnf install nginx -y
+RUN                        rm -rf /usr/share/nginx/html/index.html
+COPY                       index.html /usr/share/nginx/html/index.html
+
+
+COPY vs ADD:
+============
+COPY and ADD both are used to copy the files from workspace to docker image.but ADD cmd have some disadvantages.
+It can directly download the content from internet into the image
+It can unarchive the files from the image
+ex:1
+=====
+FROM                                 almalinux:9
+ADD                                  https://github.com/pdevops78/learn-docker/blob/main/EXPOSE/Dockerfile /tmp/sample.txt
+CMD                                  ["sleep","60"]
+
+https://github.com/pdevops78/learn-docker/blob/main/EXPOSE/Dockerfile ---- this is a raw file
+
+ex:2
+====
+
+FROM                                       almalinux:9
+ADD                                        sample1.tar /tmp/sample
+CMD                                        ["sleep","60"]
+//before completing 60 seconds we can interact with terminal and check the data is download and extract or not
+here in ADD cmd sample1.tar(any tar/zip file) can download from internet and untar the files.
+
+ENRYPOINT:
+==========
+* CMD instructions can be overriden
+ex:
+===
+FROM                  almalinux:9
+CMD                   ["ping","-c5","google.com"]
+
+at run time docker run entrypoint:1.0 yahoo.com, here it will be overriden
+* same instruction trying to override with ENTRYPOINT is not working
+ex:
+===
+ex:
+===
+FROM                  almalinux:9
+CMD                   ["ping","-c5","google.com"]
+at run time docker run entrypoint:1.0 yahoo.com, here it will not overriden
+
+you can't override ENTRYPOINT , if you try to do it will go append
+CMD vs ENTRYPOINT
+=================
+you can mix CMD and ENTRYPOINT for better results
+CMD is used to supply default arguments to ENTRYPOINT, we can always override default args from runtime.
+ex:
+===
+FROM                  almalinux:9
+CMD                   ["google.com"]
+ENTRYPOINT            ["ping","-c5"]
+here there is no destination address google.com is the default arg
+we can override at run time also
+docker run entrypoint:1.0 yahoo.com
+
+USER:
+=====
+you should not let the containers running with root access.
+FROM       almalinux:9
+RUN        adduser expense
+USER       expense
+CMD        ["sleep","100"]
+docker exec -it "<containerid>" bash , interact with terminal and check once whether root user changed as expense user.
+
+WORKDIR:
+========
+FROM         almalinux:9
+RUN          mkdir /app
+RUN          cd /app
+RUN          pwd
+CMD          ["sleep","100"] //here should not move to /app directory,
+
+ex:2
+====
+FROM         almalinux:9
+RUN          mkdir /app
+WORKDIR       /app
+RUN          pwd
+CMD          ["sleep","100"] //here should move to /app directory
+
+ARG:
+====
+this is the first instruction in only one case . It can be used to supply the version for FROM instructions.
+ARG    version
+FROM   almalinux:${version}
+
+docker run arg:1.0 --build-arg=version=9
+ex:2
+====
+you can have args in Dockerfile,you can supply the values through command through option --build-arg
+ARG    version
+FROM   almalinux:${version}
+ARG COURSE
+ARG TRAINER
+CMD ["sleep","100"]
+
+docker run arg:1.0 --build-arg=version=9 --build-arg=COURSE=DevOps --build-arg=TRAINER=RAGHU
+3. you can have default values to arg and override if required
+ARG    version
+FROM   almalinux:${version:-9}
+ARG  COURSE=DevOps
+ARG  TRAINER=RAGHU
+RUN  echo "${COURSE}"+""+"${TRAINER}"
+CMD ["sleep","100"]
+here we can override default values to new values
+
+ENV vs ARG:
+===========
+1. ENV variables can be accessed both at the time of build or image and containers.
+2. ARG instruction can only be accessed at the time of build or image.
+
+How can i access arg inside the container?
+ARG    version
+FROM   almalinux:${version:-9}
+ARG  COURSE=DevOps
+ARG  TRAINER=RAGHU
+ENV  COURSE = ${COURSE}
+RUN  echo "${COURSE},${TRAINER}"
+CMD ["sleep","100"]
+// check in terminal
+
+ONBUILD:
+========
+this is useful as a tigger , if someone is trying to use your image . you can force them to keep some files in their workspace or configuration
+Dockerfile
+
+FROM          almalinux:9
+RUN           dnf install nginx -y
+RUN           rm -rf /usr/share/nginx/html/index.html
+ONBUILD COPY  index.html /usr/share/nginx/html/index.html
+CMD            ["nginx","-g","daemon off;"]
+
+create a test folder under ONBUILD
+test----> Dockerfile
+FROM               onbuild:v1.0 //tagname
+
+test----->index.html
+<h1> this is onbuild image</h1>
+
+here child image can be created from parent FROM, then ONBUILD is triggered and COPY cmd will work
+child image provides the index.html  and copies to the destination file.
+
+
+Mysql:
+=====
+FROM mysql:8.0
+ENV MYSQL_ROOT_PASSWORD=ExpenseApp@1
+    MYSQL_USER=expense
+    MYSQL_PASSWORD=ExpenseApp@1
+    MYSQL_DATABASE=transactions
+COPY schema.sql /docker-entrypoint-initdb.d
+
+here mysql itself start the process automatically in the background
+
+
+
+
+
+
+
+
