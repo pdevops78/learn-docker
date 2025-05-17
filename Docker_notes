@@ -202,7 +202,8 @@ this is the first instruction in only one case . It can be used to supply the ve
 ARG    version
 FROM   almalinux:${version}
 
-docker run arg:1.0 --build-arg=version=9
+docker build -t arg:1.0 --build-arg=version=8 .
+
 ex:2
 ====
 you can have args in Dockerfile,you can supply the values through command through option --build-arg
@@ -269,6 +270,35 @@ ENV MYSQL_ROOT_PASSWORD=ExpenseApp@1
 COPY schema.sql /docker-entrypoint-initdb.d
 
 here mysql itself start the process automatically in the background
+
+
+Expense Project:
+================
+mysql
+backend
+frontend
+
+docker using the network as bridge network. to create network
+* docker network
+* docker  network create expense
+* docker network is a bridge network , these network connect to mysql , backend containers
+* if containers connect to host network, will get a problem, so docker network is best
+
+how to send containers to newly created containers?
+docker run -d -p 8080:8080 --name backend/mysql/frontend --network expense backend/mysql/frontend:v1.0
+here --name backend is a container host name
+
+in backend container , install mysql
+apt update
+apt install default mysql-client -y
+cat /etc/*release, to know about OS
+
+
+need to know troubleshoot:
+===========================
+
+
+
 
 
 
