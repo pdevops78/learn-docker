@@ -298,6 +298,130 @@ need to know troubleshoot:
 ===========================
 
 
+docker compose:
+===============
+to build an image:
+====================
+for i in frontend backend mysql ; do cd $i; docker build -t $i:v1.0.0 . ; cd .. ; done
+services:
+=========
+note: docker run -d -p 80:80 --name frontend/backend/mysql --network expense
+note: docker run -d -p 80:80 --name frontend/backend/mysql -v nginx:/usr/share/nginx/html --network expense
+name: expense
+version: '3.8' #default
+networks:
+    default:
+      name: expense
+services:
+  mysql:
+    image: mysql:v1.0.0  # image
+    container_name: mysql # --name mysql
+  backend:
+    image: backend:v1.0.0
+    container_name: backend
+    depends_on:
+    - mysql    # backend depends on mysql to connect with db
+  frontend:
+    image: frontend:v1.0.0
+    container_name: frontend
+    depends_on:
+    - backend   # frontend depends on backend to connect with backend
+    ports:
+    - "80:80"   # to expose application out
+
+volumes:
+========
+docker run -d -p 80:80 nginx , creates a container
+interact with terminal based on container: cd /usr/share/nginx/html
+rm -rf index.html
+echo "hi" >hi.html
+echo "hai">hai.html
+echo "hello">index.html
+expose the application based on ip address
+then remove the container and check whether nginx content is available or not.
+again create a container and then check whether echo "hi" >hi.html
+                                                echo "hai">hai.html
+                                                echo "hello">index.html this data is available or not.
+** there is no data
+volumes are ephemeral(temporary) by default, once you remove the container it will remove the data also.
+stateful application: mysql
+stateless application: backend,frontend
+where docker containers store information?
+============================================
+docker inspect "container Id"
+WorkDir: /var/lib/docker/overlay/"container Id"/work
+cd /var/lib/docker/overlay/"container Id"
+ls -l
+cd merged
+ls -l
+cd /usr/share/nginx/html
+ls -l
+if we remove the container, that folder also removed(WorkDir)
+two types of volumes:
+=======================
+1. named volumes
+2. unnamed volumes
+
+unnamed volumes: create a directory in linux and mount to container using -v host-path:container-path
+docker commands will not work for unnamed volumes.
+=================================================
+* create a directory under root as "nginx-data"
+* mkdir nginx-data
+* cd nginx-data
+* docker run -d -p 80:80 -v nginx-data:/usr/share/nginx/html nginx
+for the above command
+-v : volume
+nginx-data: create a volume
+/usr/share/nginx/html: mount inside the volume
+nginx is a image to create a container and runs the default index.html
+
+named volume:
+=============
+to create a volume with docker commands
+docker volume create nginx
+docker compose up -d , to start service
+docker compose down , to stop service
+curl http://localhost:8080/transaction, to know the list of data
+sometimes data will get delay.how to check delay?
+
+volume in service:
+==================
+name: expense
+networks:
+ default:
+   name: expense
+volumes:
+  mysql:
+   external: true #it true, you need to create manually, otherwise volume name created as expense_mysql like that
+   # docker volume create mysql
+service:
+  mysql:
+    image: mysql:v1.0.0
+    container_name: mysql
+    volumes:
+    - source: mysql
+      target: /var/lib/mysql
+      type: volume
+  backend:
+    image: backend:v1.0.0
+    container_name: backend
+    command: sh -c sleep 20 && node /app/index.js
+    depends_on:
+     - mysql
+  frontend:
+    image: frontend:v1.0.0
+    container_name: frontend
+    depends_on:
+    - backend
+    ports:
+    "80:80"
+
+
+  // here volume is created
+
+
+
+
 
 
 
