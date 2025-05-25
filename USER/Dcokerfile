@@ -1,0 +1,22 @@
+FROM                 almalinux:9
+RUN                  useradd expense
+USER                 expense
+CMD                  ["sleep","1000"]
+
+
+Step2:
+=====
+
+
+FROM        nginx
+RUN         chown -R expense:expense /user/share/nginx/html  /etc/nginx/*
+RUN         useradd expense
+USER         expense
+
+
+step3:
+=====
+FROM        nginx
+RUN         useradd expense
+USER         expense
+RUN         chown -R expense:expense /user/share/nginx/html  /etc/nginx/*

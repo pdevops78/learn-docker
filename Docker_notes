@@ -363,6 +363,11 @@ two types of volumes:
 2. unnamed volumes
 
 unnamed volumes: create a directory in linux and mount to container using -v host-path:container-path
+mkdir nginx-data
+docker run -d -p 80:80 --name frontend --network expense -v /home/ec2-user/nginx-data:/usr/share/nginx/html nginx
+echo "hello">index.html
+absolute path: /home/ec2-user/nginx-data
+containers path: /usr/share/nginx/html
 docker commands will not work for unnamed volumes.
 =================================================
 * create a directory under root as "nginx-data"
@@ -419,6 +424,21 @@ service:
 
   // here volume is created
 
+
+reduce size for stateless applications:
+========================================
+always image size should be small
+should take alpine
+
+
+Instructions to follow in Docker:
+==================================
+1. always image size should be small
+so we can use alpine
+2. always containers should run as non root user
+3. every path of an image like nginx , in this nginx, path/directories should be as non root user
+4.docker layers(has a doubt)
+5. push docker images to docker hub
 
 
 
